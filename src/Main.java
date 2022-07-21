@@ -1,18 +1,19 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 
-
 public class Main {
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws Exception {
+
         //Arquivo local com conexao da API
-        String startAPI = "loginAPI\\in.txt";
+        String startAPI = "in.txt";
         FileReader fr = new FileReader(startAPI);
         BufferedReader br = new BufferedReader(fr);
 
@@ -27,30 +28,24 @@ public class Main {
         String body = response.body();
 
 
-
-        //Pegando os dados da API
+        // extrair só os dados que interessam (titulo, poster, classificação)
         var parser = new JsonParser();
         List<Map<String, String>> listaDeFilmes = parser.parse(body);
 
-
-        //Exibindo oque desejamos de forma editada
+        // exibir e manipular os dados
+        var geradora = new StickersWpp();
         for (Map<String,String> filme : listaDeFilmes) {
-            System.out.print("\u001b[48;2;42;122;228m");
-            System.out.print("\u001b[38;2;255;255;255m");
-            System.out.println(filme.get("title"));
-            System.out.print("\u001b[m");
 
-            String imdbRating = filme.get("imDbRating");
-            Double imdbRatingDouble = Double.parseDouble(imdbRating);
-            long roundedRating = Math.round(imdbRatingDouble);
-            System.out.println(filme.get("image"));
-            System.out.println(filme.get("imDbRating"));
-            for (int i=0; i<roundedRating; i++){
-                System.out.print("\u2b50");
-            }
+            String urlImagem = filme.get("image");
+            String titulo = filme.get("title");
+
+            InputStream inputStream = new URL(urlImagem).openStream();
+            String nomeArquivo = titulo + ".png";
+
+            geradora.cria(inputStream, nomeArquivo);
+
+            System.out.println(titulo);
             System.out.println();
         }
-        
-        
     }
 }
