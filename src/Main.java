@@ -1,50 +1,38 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.List;
-import java.util.Map;
+
 
 public class Main {
     public static void main(String[] args) throws Exception {
 
         //Arquivo local com conexao da API
-        String startAPI = "in.txt";
+        String startAPI = "loginAPI\\nasa.txt";
         FileReader fr = new FileReader(startAPI);
         BufferedReader br = new BufferedReader(fr);
-
-
-
-        //Conexão https
         String url = br.readLine();
-        URI endereco = URI.create(url);
-        var client =HttpClient.newHttpClient();
-        var request = HttpRequest.newBuilder(endereco).GET().build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        String body = response.body();
+
+        //Conexão API
+        var http = new ClientHttp();
+        String json = http.buscadDados(url);
 
 
-        // extrair só os dados que interessam (titulo, poster, classificação)
-        var parser = new JsonParser();
-        List<Map<String, String>> listaDeFilmes = parser.parse(body);
+        // pegar dados da API e mostrar na tela
+        ExtratorDeConteudo extrator = new ExtratorDeConteudoNasa();
+        List<Conteudo> conteudos = extrator.extraiConteudos(json);
 
-        // exibir e manipular os dados
         var geradora = new StickersWpp();
-        for (Map<String,String> filme : listaDeFilmes) {
+        for (int i=0; i<3; i++) {
+            Conteudo conteudo = conteudos.get(i);
 
-            String urlImagem = filme.get("image");
-            String titulo = filme.get("title");
-
-            InputStream inputStream = new URL(urlImagem).openStream();
-            String nomeArquivo = titulo + ".png";
+            InputStream inputStream = new URL(conteudo.urlImagem()).openStream();
+            String nomeArquivo = conteudo.titulo() + ".png";
 
             geradora.cria(inputStream, nomeArquivo);
 
-            System.out.println(titulo);
+            System.out.println(conteudo.titulo());
             System.out.println();
         }
     }
