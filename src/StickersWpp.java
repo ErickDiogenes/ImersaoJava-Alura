@@ -28,7 +28,7 @@ public class StickersWpp {
         graphics.drawImage(imagemOriginal, 0, 0, null);
 
         // configurar a fonte
-        var fonte = new Font(Font.SANS_SERIF, Font.ITALIC, 48);
+        var fonte = new Font(Font.SANS_SERIF, Font.ITALIC, 18);
         graphics.setColor(Color.YELLOW);
         graphics.setFont(fonte);
 
